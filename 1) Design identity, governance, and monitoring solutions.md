@@ -52,6 +52,28 @@
 
 #### -Recommend a structure for management groups, subscriptions, and resource groups, and a strategy for resource tagging
 
+## Design principle
+Enforce tags where there's nothing to inherit from (resource groups), and let everything below inherit. You get consistent data without blocking delivery teams.
+ 
+## Designing a taxonomy
+Start from the requirements: who pays, who owns it, what automation needs. Keep the set small, and define the naming convention first; tags hold what the name can't.
+ 
+| Category | Example tags | Drives |
+|---|---|---|
+| Functional | `workload`, `env` | Cost per project and environment |
+| Billing | `costcentre`, `owner` | Chargeback, accountability |
+| Classification | `dataclass` | Security and compliance |
+| Operational | `criticality`, `backup`, `shutdown` | Automation |
+
+## Gotchas
+- **Policy comparisons are case-insensitive.** `in` and `equals` let `Dev` through; use `match`/`notMatch` for exact case.
+- **Deny doesn't fix existing resources;** they just show as non-compliant. Use Modify plus remediation.
+- **Remediation fails while new resources still get tagged** = the identity lacks a role on the targets.
+- **Tags aren't a security boundary.** Reader can see them, and they appear in cost exports. Never put secrets in tags.
+- **Azure-created resource groups** (e.g. `NetworkWatcherRG`) won't have your tags, so a resource group Deny blocks them. Plan an exemption.
+- **Tags don't do anything by themselves.** Automation has to read them (runbook, Function).
+- **Limits:** 50 tags per resource; tag names are case-insensitive, values case-sensitive.
+
 #### -Recommend a solution for managing compliance
 
 #### -Recommend a solution for identity governance
