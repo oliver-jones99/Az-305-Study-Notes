@@ -8,6 +8,48 @@
 
 #### -Recommend a logging solution
 
+#### -Recommend a logging solution
+
+##### Log types – what they show
+
+| Log | Scope | Shows | On by default? | Default retention | How to collect |
+|---|---|---|---|---|---|
+| **Activity Log** | Subscription (control plane / ARM) | Who created, changed or deleted a *resource* – RBAC, policy, deletes, Service Health | Yes | 90 days | Subscription diagnostic setting (Export Activity Logs) → `AzureActivity` |
+| **Resource logs** | Per resource (data plane) | What happened *inside* a resource – blob deleted, secret read, SQL queries | **No** | Not kept | Diagnostic setting on **each** resource → e.g. `StorageBlobLogs`, `AzureDiagnostics` |
+| **Entra ID logs** | Tenant (identity) | Sign-ins (who, where, MFA result) and directory changes (users, groups, roles) | Yes, in Entra | 7–30 days (by licence) | Entra ID → Diagnostic settings → `SigninLogs`, `AuditLogs` |
+| **Guest OS logs** | Inside a VM | Windows events, Syslog, performance counters | No | – | **Azure Monitor Agent + data collection rule** (MMA retired) |
+
+- A **diagnostic setting** = "send these logs there". No setting means no resource logs.
+- Logging is **forward-only** – nothing older is backfilled.
+- Control-plane actions show *who* in `AzureActivity` (`Caller`), not in the resource log.
+- Resource logs only show *who* with **Entra auth** (UPN). Account key or trusted access = no identity → disable shared key.
+- Ingestion delay is roughly 5–15 minutes.
+- At scale: **DeployIfNotExists** policy at management-group level to enforce diagnostic settings (needs a managed identity, plus a remediation task for existing resources).
+
+##### Architecture – one central workspace
+
+**Default:** one Log Analytics workspace in the **management subscription** (CAF platform). Every subscription sends to it – a workspace can collect from any subscription in the tenant.
+
+```
+mg-platform
+ └─ sub-management (lab: sub-platform)
+     └─ rg-logging → law-central
+            ▲              ▲                ▲
+   Activity Log    Activity Log      Resource logs
+   (sub-platform)  (sub-landingzone) (KV, storage, SQL…)
+```
+
+**Why one:** a single KQL view across everything · one place for alerts, workbooks and Sentinel · pooled free allowance and commitment tiers · less admin.
+
+**Only split for:** data residency · billing separation · hard access boundaries (another tenant, MSP customers).
+
+**Not reasons to split:**
+- Teams only seeing their own logs → **resource-context access** ("Use resource or workspace permissions")
+- Different retention → set **per table**
+
+**Retention:** interactive (~30 days included; `AzureActivity` 90 days free) → long-term (cheap, up to 12 years, via search job or restore) → export to storage for immutable/WORM compliance.
+
+
 #### -Recommend a solution for routing logs
 
 #### -Recommend a monitoring solution
