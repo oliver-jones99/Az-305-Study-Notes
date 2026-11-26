@@ -8,8 +8,6 @@
 
 #### -Recommend a logging solution
 
-#### -Recommend a logging solution
-
 ##### Log types – what they show
 
 | Log | Scope | Shows | On by default? | Default retention | How to collect |
@@ -51,6 +49,23 @@ mg-platform
 
 
 #### -Recommend a solution for routing logs
+
+**Destinations:**
+ 
+| Destination | What it's for | Think of it as |
+|---|---|---|
+| **Log Analytics workspace** | KQL queries, alerts, workbooks, Sentinel | The **investigation room** |
+| **Storage account** | Cheap long-term archive; can be made immutable (WORM) | The **filing cabinet with a lock** |
+| **Event Hubs** | Streams logs out in near real time to something else (a third-party SIEM, Splunk, a custom app) | The **conveyor belt** out of Azure |
+| **Partner solution** | Native integrations (e.g. Datadog, Elastic) | A **direct line** to a vendor |
+ 
+**Rules worth knowing:**
+- One diagnostic setting can send to **several destinations at once**, but only **one of each type**.
+- A resource can have **up to 5 diagnostic settings** – use another one for, e.g., a second workspace, or different log categories going to different places.
+- **Storage and Event Hubs must be in the same region as the resource.** Log Analytics doesn't have this restriction.
+**Exam gotchas:**
+- "Stream", "third-party SIEM", "Splunk/QRadar", "near real time" → **Event Hubs**. "**Microsoft Sentinel**" → **Log Analytics**, because Sentinel sits on top of a workspace.
+- Event Hub or storage in a different region from the resource → it won't appear in the diagnostic setting. Fix: create one in the resource's region (the SIEM can still read it cross-region).
 
 #### -Recommend a monitoring solution
 
