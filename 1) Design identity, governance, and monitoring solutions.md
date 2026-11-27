@@ -68,6 +68,30 @@ mg-platform
 - Event Hub or storage in a different region from the resource → it won't appear in the diagnostic setting. Fix: create one in the resource's region (the SIEM can still read it cross-region).
 
 #### -Recommend a monitoring solution
+##### Metrics vs logs
+ 
+Every Azure Monitor alert starts from one of two data types. Which one a requirement needs is often the hidden answer in exam questions.
+ 
+| | Metrics | Logs |
+|---|---|---|
+| What | Numbers sampled over time (CPU %, requests/sec) | Records of events with detail (who, what, result) |
+| Speed | Near real time (about a minute) | Delayed by ingestion (a few minutes) |
+| Cost | Platform metrics are free | You pay for ingestion into Log Analytics |
+| Good for | "Is it too high or too low right now?" | "What happened, who did it, and how does it link to other events?" |
+ 
+**Rule of thumb:** use a metric alert when a simple number crosses a threshold and you need to know fast. Use a log search alert when you need KQL to filter, join or count events.
+ 
+##### The five alert types
+ 
+Each alert type watches a different source of data. Picking the right one is the core of most monitoring exam questions.
+ 
+| Alert type | Watches |
+|---|---|
+| Metric alert | Numbers sampled over time (CPU %, disk, network) |
+| Log search alert | A KQL query over logs |
+| Activity log alert | Control-plane events (someone deleted or changed a resource) |
+| Service Health alert | Azure-wide incidents in a region |
+| Resource Health alert | One specific resource becoming unhealthy because of Azure |
 
 ## Design authentication and authorization solutions
 
